@@ -10,24 +10,39 @@ from pathlib import PosixPath
 import sys
 
 
-def str2num(cal_val: str ):
+def get_calibration_value_with_strings(cal_val: str ):
     num_dict = {'zero':'0', 'one':'1', 'two':'2', 'three':'3', 'four':'4',
                 'five':'5', 'six':'6', 'seven':'7', 'eight':'8', 'nine':'9'}
-    num_list = range(10)
+    num_list = [str(i) for i in range(10)]
+    num_list.extend(list(num_dict.keys()))
 
-    # add num vals to strings next to numbers 
-    first_num_str = None
+    first_num = None
     first_num_idx = None
-    last_num_str = None
+    last_num = None
     last_num_idx = None
-    for number in num_dict.keys():
+    for number in num_list:
         f_idx = cal_val.find(number)
         l_idx = cal_val.rfind(number)
-        if f_idx != -1 and :
-            
+        if f_idx != -1:
+            if  first_num_idx is None or f_idx < first_num_idx:
+                first_num_idx = f_idx
+                first_num = number
+            if  last_num_idx is None or l_idx > last_num_idx:
+                last_num_idx = l_idx
+                last_num = number
+    if first_num is None:
+        return 0
+    
+    if first_num in num_dict.keys():
+        first_num = num_dict[first_num]
+    if last_num in num_dict.keys():
+        last_num = num_dict[last_num]
+
+    cal_val = 10*int(first_num) + int(last_num)
+    print(cal_val)
     return cal_val
 
-def get_calibration_value( cal_val: str, string_nums:bool ):
+def get_calibration_value( cal_val: str ):
     first_digit = None
 
     for char in cal_val:
@@ -52,7 +67,7 @@ def sum_coefficients( input_file ):
     with open(input_file, "r") as f:
         for line in f:
             output_sum += get_calibration_value(line)
-            part2_sum += get_calibration_value(str2num(line))
+            part2_sum += get_calibration_value_with_strings(line)
     return (output_sum, part2_sum)
 
 
