@@ -5,16 +5,18 @@ calibration_input:str -- input file containing calibration codes
 Return: Calibration Value:int -- Final calibration result 
 """
 
-import numbers
 from pathlib import PosixPath
 import sys
 
+import time
 
-def get_calibration_value_with_strings(cal_val: str ):
+def get_calibration_value_alt(cal_val: str, include_str:bool ):
     num_dict = {'zero':'0', 'one':'1', 'two':'2', 'three':'3', 'four':'4',
                 'five':'5', 'six':'6', 'seven':'7', 'eight':'8', 'nine':'9'}
     num_list = [str(i) for i in range(10)]
-    num_list.extend(list(num_dict.keys()))
+
+    if include_str:
+        num_list.extend(list(num_dict.keys()))
 
     first_num = None
     first_num_idx = None
@@ -33,14 +35,15 @@ def get_calibration_value_with_strings(cal_val: str ):
     if first_num is None:
         return 0
     
-    if first_num in num_dict.keys():
-        first_num = num_dict[first_num]
-    if last_num in num_dict.keys():
-        last_num = num_dict[last_num]
+    if include_str:
+        if first_num in num_dict.keys():
+            first_num = num_dict[first_num]
+        if last_num in num_dict.keys():
+            last_num = num_dict[last_num]
 
     cal_val = 10*int(first_num) + int(last_num)
-    print(cal_val)
     return cal_val
+
 
 def get_calibration_value( cal_val: str ):
     first_digit = None
@@ -60,14 +63,29 @@ def get_calibration_value( cal_val: str ):
 
     return 10*first_digit + second_digit
 
+
 def sum_coefficients( input_file ):
 
+    processing_time = 0
+    alt_processing_time = 0
+
     output_sum = 0
+    alt_sum = 0
     part2_sum = 0
     with open(input_file, "r") as f:
         for line in f:
+            start_time = time.time()
             output_sum += get_calibration_value(line)
-            part2_sum += get_calibration_value_with_strings(line)
+            processing_time += (time.time() - start_time)
+
+            start_time = time.time()
+            alt_sum += get_calibration_value_alt(line, False)
+            alt_processing_time += (time.time() - start_time)
+
+            part2_sum += get_calibration_value_alt(line, True)
+    
+    print(f'Processing Time Method1: {processing_time}')
+    print(f'Processing Time Method2: {alt_processing_time}')
     return (output_sum, part2_sum)
 
 
