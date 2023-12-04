@@ -1,6 +1,7 @@
 import sys
 from pathlib import PosixPath
 
+## Generic Table Building from file ## 
 def Build_Schematic_Table( input_file: str ):
     character_table = []
     with open(input_file) as f:
@@ -8,6 +9,7 @@ def Build_Schematic_Table( input_file: str ):
             character_table.append(list(line))
     return character_table
 
+#### Part 1 Below ####
 class Indices:
     start_idx = None
     end_idx = None
@@ -102,6 +104,8 @@ def Evaluate_Schematic_Part_Sum( schematic_table:list ):
     return part_sum
 
 
+#### Part 2 Below ####
+
 def Find_Full_Num( line:list, center_idx:int ):
     number = [line[center_idx]]
     assert(number[0].isnumeric())
@@ -130,7 +134,7 @@ def Find_Full_Num( line:list, center_idx:int ):
     return int( num_str )
 
 
-def CheckSurroundingNums( ref_table:list, line_idx:int, col_idx:int ):
+def GetGearRatio( ref_table:list, line_idx:int, col_idx:int ):
     check_above = (line_idx != 0)
     check_below = (line_idx != (len(ref_table)-1))
     check_left = col_idx != 0
@@ -161,9 +165,9 @@ def CheckSurroundingNums( ref_table:list, line_idx:int, col_idx:int ):
                 out_mult *= Find_Full_Num(ref_table[line_idx-1],col_idx+1)
     
     if check_below:
-        if ref_table[line_idx-1][col_idx].isnumeric():
+        if ref_table[line_idx+1][col_idx].isnumeric():
             num_count += 1
-            out_mult *= Find_Full_Num(ref_table[line_idx-1],col_idx)
+            out_mult *= Find_Full_Num(ref_table[line_idx+1],col_idx)
         else:
             if check_left and ref_table[line_idx+1][col_idx-1].isnumeric():
                 num_count += 1
@@ -193,7 +197,7 @@ def Sum_Gear_Ratio_In_Line( schematic_table:list, line_idx:int ):
     gear_idxs = Find_Gear_Idxs( schematic_table[line_idx])
 
     for gear_idx in gear_idxs:
-        line_sum += CheckSurroundingNums(schematic_table, line_idx, gear_idx)
+        line_sum += GetGearRatio(schematic_table, line_idx, gear_idx)
     
     return line_sum
 
@@ -204,7 +208,6 @@ def Evaluate_Gear_Ratio_Sum( schematic_table: list ):
         ratio_sum += Sum_Gear_Ratio_In_Line( schematic_table, i )
     
     return ratio_sum
-
 
 
 if __name__ == '__main__':
