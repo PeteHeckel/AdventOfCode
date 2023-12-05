@@ -1,6 +1,6 @@
 import sys
 from pathlib import PosixPath
-from numpy import prod
+from math import prod
 
 def calc_set_power( cube_counts:dict ):
     return prod(list(cube_counts.values()))
