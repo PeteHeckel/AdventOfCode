@@ -28,15 +28,29 @@ def map_seeds( agro_map:AgricultureMap, input_seeds:list ):
     outputs = []
     for seed in input_seeds:
         outputs.append(agro_map.map_input(seed))
-    print(outputs)
     return outputs
+
+def get_seeds( seed_line: str, range_of_seeds: bool ):
+    seed_list = seed_line.strip().split(':')[1].split()
+    seed_list = [int(i) for i in seed_list]
+
+    seeds = []
+    if range_of_seeds:
+        for i in range(int(len(seed_list)/2)):
+            start_range = seed_list[2*i]
+            range_size = seed_list[2*i+1]
+            seeds.extend(list(range(start_range, start_range + range_size)))
+    else:
+        seeds = seed_list
+    return seeds
 
 
 def parse_almanac( almanac_file: str ):
     with open(almanac_file,'r') as f:
         # First Line is starting seeds
-        seed_nums = f.readline().strip().split(':')[1].split()
-        seed_nums = [int(i) for i in seed_nums]
+        seed_line = f.readline()
+        part1_seed_nums = get_seeds(seed_line, False)
+        part2_seed_nums = get_seeds(seed_line, True)
 
         agro_map = AgricultureMap()
         building = False
@@ -46,7 +60,8 @@ def parse_almanac( almanac_file: str ):
                 agro_map.clear()
                 building = True
             elif line.strip() == '': # Run seeds through map 
-                seed_nums = map_seeds(agro_map, seed_nums)
+                part1_seed_nums = map_seeds(agro_map, part1_seed_nums)
+                part2_seed_nums = map_seeds(agro_map, part2_seed_nums)
                 building = False
             else: # Build with numbers
                 range_nums = line.strip().split()
@@ -54,10 +69,12 @@ def parse_almanac( almanac_file: str ):
                 agro_map.add_range(range_nums)
         
         if building:
-            seed_nums = map_seeds(agro_map, seed_nums)
+            part1_seed_nums = map_seeds(agro_map, part1_seed_nums)
+            part2_seed_nums = map_seeds(agro_map, part2_seed_nums)
         
-        print(f'Lowest Location number: {min(seed_nums)}')
-        
+        print(f'Part1 Lowest Location number: {min(part1_seed_nums)}')
+        print(f'Part2 Lowest Location number: {min(part2_seed_nums)}')
+
 
 
 if __name__ == '__main__':
