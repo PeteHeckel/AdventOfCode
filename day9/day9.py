@@ -18,20 +18,25 @@ def extrapolate( line_history: str ):
         layer_depth += 1
 
     next_sequence_num = 0
+    prev_sequence_num = 0
     differential_layers.reverse()
 
     for layer in differential_layers:
         next_sequence_num += layer[-1]
+        prev_sequence_num = layer[0] - prev_sequence_num
 
-    return next_sequence_num
+    return prev_sequence_num, next_sequence_num
 
 def OASIS( input_file: str ):
     sum_of_next_values = 0
+    sum_of_prev_values = 0
     with open(input_file) as f:
         for line in f:
-            next_value = extrapolate(line)
+            prev_value, next_value = extrapolate(line)
             sum_of_next_values += next_value
-    print(f'Sum of Extrapolations: {sum_of_next_values}')
+            sum_of_prev_values += prev_value
+    print(f'Sum of Future Extrapolations: {sum_of_next_values}')
+    print(f'Sum of Past Extrapolations: {sum_of_prev_values}')
 
 if __name__ == '__main__':
     if (len(sys.argv) != 2) or not PosixPath(sys.argv[1]).is_file() :
