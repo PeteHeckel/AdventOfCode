@@ -61,6 +61,24 @@ def get_character( char_map:list, xy_coordinates:tuple ):
     (x_idx,y_idx) = xy_coordinates
     return char_map[y_idx][x_idx]
 
+def count_internal_pieces( character_line:list, original_line:list):
+    inside_loop = False
+    squeeze_char = None
+    inside_char_count = 0
+    turn_pieces = ['L','J','7','F']
+    for x_idx, char in enumerate(character_line):
+        if char == 'P':
+            pipe_type = original_line[x_idx]
+            print(pipe_type, end='')
+            if pipe_type == '|' or pipe_type == 'S':
+                inside_loop = not inside_loop
+            elif pipe_type == 'L' or pipe_type == 'F':
+                squeeze_char = pipe_type
+            elif (pipe_type == '7' and squeeze_char == 'L') or (pipe_type == 'J' and squeeze_char == 'F'):
+                inside_loop = not inside_loop
+        elif inside_loop:
+            inside_char_count += 1
+    return inside_char_count
 
 def find_furthest_pipe( map_file: str ):
     pipe_map = []
@@ -78,17 +96,30 @@ def find_furthest_pipe( map_file: str ):
     traveller = PipePiece( next_char, (start_x, start_y+1) )
     step_count = 1
 
+    pipe_coords = [traveller.get_coords()]
+
     while not traveller.start:
         next_coords = traveller.get_next_coords( prev_coords )
         prev_coords = traveller.get_coords()
         next_char = get_character( pipe_map, next_coords )
         traveller = PipePiece( next_char, next_coords )
         step_count += 1
+        pipe_coords.append(traveller.get_coords())
 
     half_point = step_count / 2
 
+    # Deep copy
+    original_map = [x[:] for x in pipe_map]
+
+    for (x_coord, y_coord) in pipe_coords:
+        pipe_map[y_coord][x_coord] = 'P'
+
+    inside_area = 0
+    for y_idx, line in enumerate(pipe_map):
+        inside_area += count_internal_pieces(line, original_map[y_idx])
+
     print(f'Furthest point is {half_point}')    
-     
+    print(f'Loop inside area is {inside_area} tiles')
 
 if __name__ == '__main__':
     if (len(sys.argv) != 2) or not PosixPath(sys.argv[1]).is_file() :
