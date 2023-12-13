@@ -4,7 +4,7 @@ from pathlib import PosixPath
 def find_galaxy_dist( coords1:list, coords2:list ):
     return abs(coords1[0] - coords2[0]) + abs(coords1[1] - coords2[1])
 
-def find_galaxy_path_sum( galaxy_map_file: str):
+def find_galaxy_path_sum( galaxy_map_file: str, space_expanding_rate:int = 2 ):
     with open(galaxy_map_file) as f:
         galaxy_map = f.read().split()
 
@@ -24,15 +24,17 @@ def find_galaxy_path_sum( galaxy_map_file: str):
 
     empty_columns = [i for i in range(len(empty_columns)) if empty_columns[i]]
     
+    space_extras = space_expanding_rate - 1
+
     for extra_cols, empty_col in enumerate(empty_columns):
         for galaxy in galaxys:
-            if galaxy[0] > empty_col + extra_cols:
-                galaxy[0] += 1
+            if galaxy[0] > empty_col + extra_cols*space_extras:
+                galaxy[0] += space_extras
 
     for extra_rows, empty_row in enumerate(empty_rows):
         for galaxy in galaxys:
-            if galaxy[1] > empty_row + extra_rows:
-                galaxy[1] += 1
+            if galaxy[1] > empty_row + extra_rows*space_extras:
+                galaxy[1] += space_extras
 
     distance_sum = 0
     for idx in range(len(galaxys)):
@@ -47,6 +49,10 @@ if __name__ == '__main__':
         print('Error 1 file argument needed')
         exit(1)
 
+    # part 1
     find_galaxy_path_sum(sys.argv[1])
+
+    # part 2
+    find_galaxy_path_sum(sys.argv[1], 1000000)
 
     exit(0)
