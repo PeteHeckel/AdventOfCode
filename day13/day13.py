@@ -13,6 +13,46 @@ def build_mirror_maps( mirror_rock_map: str ):
                 mirrors[mirror_count].append(list(line.strip()))
     return mirrors
 
+# transpose
+def transpose_lists(list_of_lists: list):
+    return list(map(list, zip(*list_of_lists)))
+
+def reflect_check( first_half: list, second_half: list ):
+    # print('first')
+    # print(first_half)
+    # print('second')
+    # print(second_half)
+
+    first_half_compare = list(reversed(first_half))
+    second_half_compare = second_half
+    
+
+    for half_1,half_2 in zip(first_half_compare, second_half_compare):
+        if half_1 != half_2:
+            return False
+
+    return True
+
+def mirror_code( mirror_map:list ):
+    horizontal_split_potentials = set(range(1, len(mirror_map)))
+
+    for split in horizontal_split_potentials:
+        top_side = mirror_map[:split]
+        bottom_side = mirror_map[split:]
+        if reflect_check(top_side, bottom_side):
+            return split * 100
+
+    mirror_map_t = transpose_lists(mirror_map)
+
+    vertical_split_potentials = set(range(1, len(mirror_map_t)))
+    for split in vertical_split_potentials:
+        top_side = mirror_map_t[:split]
+        bottom_side = mirror_map_t[split:]
+        if reflect_check(top_side, bottom_side):
+            return split
+
+    assert(False)
+
 
 def summarize_mirror( mirror_map: list ):
     # First check for vertical mirror
@@ -69,7 +109,7 @@ if __name__ == '__main__':
     mirror_summary = 0
 
     for mirror_map in mirror_maps:
-        mirror_summary += summarize_mirror( mirror_map )
+        mirror_summary += mirror_code( mirror_map )
 
     print(f'Mirror summary: {mirror_summary}')
 
