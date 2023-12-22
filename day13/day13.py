@@ -17,12 +17,8 @@ def build_mirror_maps( mirror_rock_map: str ):
 def transpose_lists(list_of_lists: list):
     return list(map(list, zip(*list_of_lists)))
 
+# Part 1 check
 def reflect_check( first_half: list, second_half: list ):
-    # print('first')
-    # print(first_half)
-    # print('second')
-    # print(second_half)
-
     first_half_compare = list(reversed(first_half))
     second_half_compare = second_half
     
@@ -33,13 +29,26 @@ def reflect_check( first_half: list, second_half: list ):
 
     return True
 
+# Part 2 check
+def smudge_check( first_half:list, second_half:list):
+    first_half_compare = list(reversed(first_half))
+    second_half_compare = second_half
+    
+    different_count = 0
+    for half_1,half_2 in zip(first_half_compare, second_half_compare):
+        for item1, item2 in zip(half_1, half_2):
+            if item1 != item2:
+                different_count += 1
+    
+    return different_count == 1
+
 def mirror_code( mirror_map:list ):
     horizontal_split_potentials = set(range(1, len(mirror_map)))
 
     for split in horizontal_split_potentials:
         top_side = mirror_map[:split]
         bottom_side = mirror_map[split:]
-        if reflect_check(top_side, bottom_side):
+        if smudge_check(top_side, bottom_side):
             return split * 100
 
     mirror_map_t = transpose_lists(mirror_map)
@@ -48,8 +57,11 @@ def mirror_code( mirror_map:list ):
     for split in vertical_split_potentials:
         top_side = mirror_map_t[:split]
         bottom_side = mirror_map_t[split:]
-        if reflect_check(top_side, bottom_side):
+        if smudge_check(top_side, bottom_side):
             return split
+
+    for line in mirror_map:
+        print(line)
 
     assert(False)
 
