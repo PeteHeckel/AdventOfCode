@@ -1,4 +1,3 @@
-from itertools import count
 import sys
 from pathlib import PosixPath
 
@@ -54,6 +53,11 @@ def tilt_platform( platform_map: list, tilt_direction: str ):
 
     return row_organized_map
 
+def hash_platform( platform_map: list ):
+    hashing_str = ''
+    for row in platform_map:
+        hashing_str += str(row)
+    return hashing_str
 
 if __name__ == '__main__':
     if (len(sys.argv) != 2) or not PosixPath(sys.argv[1]).is_file() :
@@ -77,12 +81,33 @@ if __name__ == '__main__':
     tilt_dir_cycle = ['N', 'W', 'S', 'E']
     tilted_map = initial_platform
 
-    # TODO: determine settling point using LCM
-    for _i in range(1000000000):
+    board_states = {}
+    spin_count = 1000000000
+
+    for i in range(spin_count):
+        state = hash_platform(tilted_map)
+        if board_states.get( state ) is None:
+            board_states[state] = i
+        else:
+            # At this point we are in a defined loop. Find the loop length and then see what the output state is
+            cycle_len = i - board_states[state]
+            remaining_cycles = spin_count - i
+            offset = remaining_cycles % cycle_len
+            print(offset)
+            break
+    
         for tilt_dir in tilt_dir_cycle:
             tilted_map = tilt_platform(tilted_map, tilt_dir)
 
-    for line in tilted_map:
-        print(line)
+    for _i in range(offset):
+        for tilt_dir in tilt_dir_cycle:
+            tilted_map = tilt_platform(tilted_map, tilt_dir)
+
+    load = 0
+    for platform_distance, platform_row in enumerate(reversed(tilted_map), start=1):
+        rock_count = len([square_val for square_val in platform_row if square_val == 'O'])
+        load += rock_count * platform_distance
+
+    print(f'Load after {spin_count} cycles is {load}')    
 
     exit(0)
