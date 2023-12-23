@@ -97,4 +97,21 @@ if __name__ == '__main__':
     energized_tiles = find_energized(mirror_map, (0,0), 'E')
     print(f'Total energized tiles: {energized_tiles}')
 
+    # Part 2
+    most_energized = energized_tiles
+    map_x_bound = len(mirror_map[0])
+    map_y_bound = len(mirror_map)
+    
+    # Try row end starting spots
+    for y_idx in range(map_y_bound):
+        most_energized = max( most_energized, find_energized(mirror_map, (0,y_idx), 'E'))
+        most_energized = max( most_energized, find_energized(mirror_map, (map_x_bound-1,y_idx), 'W'))
+    
+    # Try col end starting spots
+    for x_idx in range(map_x_bound):
+        most_energized = max( most_energized, find_energized(mirror_map, (x_idx,0), 'S'))
+        most_energized = max( most_energized, find_energized(mirror_map, (x_idx,map_y_bound-1), 'N'))
+
+    print(f'Most energized position energizes {most_energized} tiles')
+
     exit(0)
