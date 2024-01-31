@@ -1,14 +1,19 @@
 from pathlib import PosixPath
 import sys
 
-def read_dig_plan( map_file: str ):
+def read_dig_plan( map_file: str, hex_value=False ):
     with open(map_file) as f:
-        edge_list = f.readlines()
+        dig_plan = f.readlines()
     
-    for edge in edge_list:
-        edge = edge.strip()
-        [direction, length, rgb_colour] = edge.split(' ', 3)
-        edge = (direction, int(length), rgb_colour)
+    edge_list = []
+    for line in dig_plan:
+        line = line.strip()
+        [direction, length, rgb_colour] = line.split(' ', 3)
+        if hex_value:
+            num_to_direction_dict = {'0':'R', '1':'D', '2':'L', '3':'U'}
+            direction = num_to_direction_dict[rgb_colour[7]]
+            length = int(rgb_colour[2:7], base=16)
+        edge_list.append((direction, int(length), rgb_colour))
 
     return edge_list
 
@@ -47,11 +52,10 @@ def calc_lagoon_area( dig_plan: list ):
     lagoon_edges = []
 
     for edge in dig_plan:
-        (direction, length, rgb_colour) = edge.split(' ')
+        (direction, length, rgb_colour) = edge
         corner_piece = Edge(coordinates, rgb_colour)
         coordinates = corner_piece.get_end_coords(direction, int(length))
         lagoon_edges.append(corner_piece)
-        print(corner_piece)
     
     # shoelace formula 
     area = 0
@@ -77,15 +81,18 @@ def calc_lagoon_area( dig_plan: list ):
     holes = area + edge_len/2 + 1
     print(f'Volume: {holes}')
 
-    
 
 if __name__ == '__main__':
     if (len(sys.argv) != 2) or not PosixPath(sys.argv[1]).is_file() :
         print('Error 1 file argument needed')
         exit(1)
     
-    plan = read_dig_plan(sys.argv[1])
-    
+    print('Part1:')
+    plan = read_dig_plan(sys.argv[1], False)
+    calc_lagoon_area(plan)
+
+    print('Part2:')
+    plan = read_dig_plan(sys.argv[1], True)
     calc_lagoon_area(plan)
 
     exit(0)
