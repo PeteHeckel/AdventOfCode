@@ -34,6 +34,25 @@ def count_xmas( input: list[str] ) -> int :
     
     return total
 
+# Part 2
+def count_x_mas( input: list[str] ) -> int: 
+    search_crit = ["MS", "SM"]
+    
+    input_map = word_map(input)
+    total = 0
+
+    for y in range(1, input_map.bottom_bound - 1):
+        for x in range(1, input_map.end_bound - 1):
+            if input_map.get_char(x,y) != "A":
+                continue
+            
+            diag1 = input_map.get_char(x-1,y+1) + input_map.get_char(x+1,y-1)
+            diag2 = input_map.get_char(x-1,y-1) + input_map.get_char(x+1,y+1)
+
+            if diag1 in search_crit and diag2 in search_crit:
+                total +=1
+
+    return total
 
 test_array = "MMMSXXMASM\n\
 MSAMXMSMSA\n\
@@ -55,3 +74,7 @@ if __name__ == "__main__":
     count = count_xmas(input)
     
     print(f'Number of XMAS occurances: {count}')
+
+    count = count_x_mas(input)
+
+    print(f'Number of X-MAS occurances: {count}')
