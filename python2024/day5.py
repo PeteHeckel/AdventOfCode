@@ -1,7 +1,5 @@
 import sys
 
-
-
 test_array = "47|53\n\
 97|13\n\
 97|61\n\
@@ -42,15 +40,26 @@ def check_order( rules: dict, order: list[int] ) -> bool:
                 return False
     return True
 
-def check_valid( rules: dict, orders: list[list[int]] ) -> int:
-    middle_number_sum = 0
+def fix_order( rules: dict, order: list[int]) -> list[int]:
+    new_order = []
+    
+    while order:
+        test_page = order.pop()
+        if test_page in rules.keys():
+            priors = rules[test_page]
 
-    for order in orders:
-        if check_order( rules, order ):
-            middle_number_sum += order[int(len(order)/2)]
-
-    return middle_number_sum
-
+            if set(priors) & set(order):
+                # find where to insert it so that the ordering is valid for the test page
+                for i in range(len(order), -1, -1):
+                    if not set(priors) & set(order[:i] ):
+                        order.insert( i, test_page )
+                        break
+            else:
+                new_order.insert(0, test_page)
+        else:
+            new_order.insert(0, test_page)
+    
+    return new_order
 
 def parse_input( input: str ) -> tuple[dict, list[list[int]]]:
     
@@ -78,4 +87,15 @@ if __name__ == "__main__":
     
     rules, orders = parse_input(input)
 
-    print(f'valid middle page sum = {check_valid( rules, orders )}' )
+    valid_middle_sum = 0
+    fixed_middle_sum = 0
+
+    for order in orders:
+        if check_order( rules, order ):
+            valid_middle_sum += order[int(len(order)/2)]
+        else:
+            new_order = fix_order( rules, order )
+            fixed_middle_sum += new_order[int(len(new_order)/2)]
+
+    print(f'valid middle page sum = {valid_middle_sum}' )
+    print(f'valid fixed page sum = {fixed_middle_sum}' )
