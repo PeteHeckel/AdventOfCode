@@ -1,3 +1,4 @@
+import copy
 import sys 
 
 test_input = "\
@@ -14,21 +15,22 @@ test_input = "\
 
 class traveller(object): 
     def __init__( self, labmap: list[str] ):
+        self.dir = "N"  # In both the example and the real case, the starting direction is north/up
+
         # Find Traveller
-        for i, line in enumerate(labmap):
-            start = line.find("^")
-            if start != -1:
-                self.coords = (start, i)
+        for y_axis, line in enumerate(labmap):
+            x_axis = line.find("^")
+            if x_axis != -1:
+                self.coords = (x_axis, y_axis)
                 break
         
         assert(self.coords != None)
-        self.dir = "N"  # In both the example and the real case, the starting direction is north/up
-        self.labmap = labmap
+        self.labmap = labmap.copy()
         self.ylim = len(labmap)
         self.xlim = len(labmap[0])
         self.visited_coords = {self.coords}
-    
-    def rotate( self ): 
+
+    def rotate( self ):
         match self.dir:
             case "N": self.dir = "E"
             case "E": self.dir = "S"
@@ -42,11 +44,11 @@ class traveller(object):
             case "S": next_coords = (self.coords[0], self.coords[1]+1)
             case "W": next_coords = (self.coords[0]-1, self.coords[1])
         
+
         if (not (0 <= next_coords[0] < self.xlim)) or (not (0 <= next_coords[1] < self.ylim)):
             return True # broke free of the map
         
-        print(next_coords)
-        print(self.dir)
+        # Move to next square
         if self.labmap[next_coords[1]][next_coords[0]] == "#":
             self.rotate()
         else:
@@ -56,6 +58,28 @@ class traveller(object):
         
         return False
     
+    def check_recurive( self ) -> bool:
+        
+        # Simulate placing a single rock at the current point, and redo the whole walkthrough to see if it generates a loop
+        fake_map = copy.deepcopy(self.labmap)
+        if fake_map[self.coords[1]][self.coords[0]] == "^":
+            return False # can't place a fake rock at the starting point
+        
+        # Replace the value with # instead
+        fake_map[self.coords[1]] = fake_map[self.coords[1]][:self.coords[0]] + "#" + fake_map[self.coords[1]][self.coords[0] + 1:]
+
+        recurse_tester = traveller(fake_map)
+
+        seen_vecs = {(recurse_tester.coords, recurse_tester.dir)}
+        while( not recurse_tester.travel() ):
+            current_vec = (recurse_tester.coords, recurse_tester.dir)
+            if current_vec in seen_vecs:
+                return True
+            seen_vecs.add(current_vec)
+
+        return False
+
+
     def get_visited( self ) -> int:
         return len(self.visited_coords)
 
@@ -74,10 +98,13 @@ if __name__ == "__main__":
 
     travelling_dude = traveller(labmap)
 
-    while( not travelling_dude.travel() ):
-        # wait till he breaks free
-        pass
-    
-    print(f'Spots visited = {travelling_dude.get_visited()}')
+    recursive_positions = set()
 
+    while( not travelling_dude.travel() ):
+        if (not travelling_dude.coords in recursive_positions) and travelling_dude.check_recurive():
+            recursive_positions.add(travelling_dude.coords)
+        pass
+
+    print(f'Spots visited = {travelling_dude.get_visited()}')
+    print(f'recursions: {len(recursive_positions)}')
 
