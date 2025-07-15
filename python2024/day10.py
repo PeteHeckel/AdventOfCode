@@ -43,6 +43,15 @@ class topography_map( object ):
             next_paths.append( (x, y-1) )
         return next_paths
 
+    def get_rating( self, points: set[tuple[int,int]] ) -> int:
+        ends = 0
+        for point in points:
+            if self.get_value(point[0], point[1]) == 9:
+                ends += 1
+            else:
+                ends += self.get_rating(set(self.get_next(point[0], point[1])))
+        return ends
+
     def get_endpoints( self, points: set[tuple[int,int]] ) -> int:
         ends = 0
         next_points = set()
@@ -66,8 +75,11 @@ if __name__ == "__main__":
     topo_map = topography_map( inp )
     
     endpoint_sum = 0
+    rating_sum = 0
     for starts in topo_map.trailheads:
         endpoint_sum += topo_map.get_endpoints({(starts[0], starts[1])})
+        rating_sum += topo_map.get_rating({(starts[0], starts[1])})
 
     print(f"Trailhead scores = {endpoint_sum}")
+    print(f"Trailhead ratings = {rating_sum}")
     
