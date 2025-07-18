@@ -65,6 +65,24 @@ def get_fence_cost( region: list[tuple[int,int]]) -> int:
 
     return area * perimeter
 
+def get_fence_discount( region: list[tuple[int,int]]) -> int:
+    area = len(region)
+    sides = 0
+
+    # Num sides == num corners
+    for coord in region:
+        # outer corners
+        if (coord[0]+1, coord[1]) not in region and (coord[0], coord[1]+1) not in region: sides += 1
+        if (coord[0]-1, coord[1]) not in region and (coord[0], coord[1]+1) not in region: sides += 1
+        if (coord[0]+1, coord[1]) not in region and (coord[0], coord[1]-1) not in region: sides += 1
+        if (coord[0]-1, coord[1]) not in region and (coord[0], coord[1]-1) not in region: sides += 1
+        # inner corners
+        if (coord[0]+1, coord[1]) in region and (coord[0], coord[1]+1) in region and (coord[0]+1, coord[1]+1) not in region: sides += 1
+        if (coord[0]-1, coord[1]) in region and (coord[0], coord[1]+1) in region and (coord[0]-1, coord[1]+1) not in region: sides += 1
+        if (coord[0]+1, coord[1]) in region and (coord[0], coord[1]-1) in region and (coord[0]+1, coord[1]-1) not in region: sides += 1
+        if (coord[0]-1, coord[1]) in region and (coord[0], coord[1]-1) in region and (coord[0]-1, coord[1]-1) not in region: sides += 1
+
+    return sides * area
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1] == "test":
@@ -75,7 +93,10 @@ if __name__ == "__main__":
     regions = find_regions( inpt.splitlines() )
 
     total = 0
+    discounted = 0
     for region in regions:
         total += get_fence_cost(region)
+        discounted += get_fence_discount(region)
 
     print( total )
+    print( discounted )
