@@ -1,6 +1,5 @@
 import sys
 import numpy as np
-import math
 
 test_input = "\
 Button A: X+94, Y+34\n\
@@ -75,7 +74,11 @@ def calc_cheapest_route( a_vec, b_vec, target_vec ) -> int:
     A = np.array([[a[0], b[0]], [a[1], b[1]]])
 
     soln = np.linalg.solve(A,t)
-    
+    soln = np.round(soln).astype(int)
+
+    if soln[0] < 0 or soln[1] < 0:
+        return None
+
     # Test solution (solve function will give floating point answers
     # we are only looking for integer correct answers)
     a_press = int(soln[0])
@@ -83,7 +86,6 @@ def calc_cheapest_route( a_vec, b_vec, target_vec ) -> int:
     if ((a[0] * a_press + b[0] * b_press == t[0]) and 
        (a[1] * a_press + b[1] * b_press == t[1])):
         return soln[0] * 3 + soln[1]
-
     return None
 
 
@@ -98,7 +100,8 @@ if __name__ == "__main__":
     total_tokens = 0
     for (a, b, target) in machine_params:
         cost = find_cheapest_route(a,b,target)
-        if cost:
+
+        if cost is not None:
             total_tokens += cost
 
     print(f"Total Tokens required: {total_tokens}")
